@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordDuo — учим слова</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #2b3a55 0%, #1e2b3c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 1100px;
+            height: 90vh;
+            background: #f8faff;
+            border-radius: 42px;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+        }
+
+        .header {
+            padding: 20px 28px;
+            background: #ffffff;
+            border-bottom: 2px solid #e3e9f2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            background: #eef2f9;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e2b3c;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            border: 1px solid #d0ddeb;
+        }
+
+        .btn:hover {
+            background: #dde5f0;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 30px;
+        }
+
+        .main-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px 30px;
+            scrollbar-width: thin;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e2b3c;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .folders-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .folder-card {
+            background: white;
+            border-radius: 24px;
+            padding: 18px 22px;
+            min-width: 170px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
+            border: 2px solid #e3e9f2;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .folder-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-3px);
+            box-shadow: 0 14px 24px -8px rgba(59, 130, 246, 0.3);
+        }
+
+        .folder-card.active {
+            border-color: #3b82f6;
+            background: #f0f7ff;
+            box-shadow: 0 8px 18px -4px #3b82f640;
+        }
+
+        .folder-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e2b3c;
+            word-break: break-word;
+        }
+
+        .folder-count {
+            font-size: 13px;
+            color: #6b7a8f;
+            font-weight: 500;
+        }
+
+        .folder-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+
+        .folder-actions .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .words-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 18px 0 24px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .word-row {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 18px;
+            border: 1px solid #e3e9f2;
+            gap: 12px;
+            font-size: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .word-en {
+            font-weight: 700;
+            color: #1e2b3c;
+            min-width: 120px;
+        }
+
+        .word-ru {
+            color: #3b4b62;
+            flex: 1;
+        }
+
+        .word-transcription {
+            color: #8b9bb0;
+            font-style: italic;
+            font-size: 13px;
+            min-width: 100px;
+        }
+
+        .word-audio-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 30px;
+            transition: 0.15s;
+            color: #3b82f6;
+        }
+
+        .word-audio-btn:hover {
+            background: #e0edff;
+        }
+
+        .add-word-form {
+            background: #eef5ff;
+            padding: 20px;
+            border-radius: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            margin-top: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1 1 160px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #5c6e85;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .input-group input {
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1.5px solid #cfdbe9;
+            font-size: 15px;
+            background: white;
+            outline: none;
+            transition: 0.15s;
+        }
+
+        .input-group input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px #3b82f630;
+        }
+
+        .quiz-section {
+            margin-top: 10px;
+            background: white;
+            border-radius: 32px;
+            padding: 24px 26px;
+            border: 1px solid #e3e9f2;
+            box-shadow: 0 12px 28px -10px rgba(0,0,0,0.08);
+        }
+
+        .level-badge {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            margin-bottom: 18px;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .quiz-progress {
+            font-weight: 600;
+            color: #556b82;
+            font-size: 14px;
+        }
+
+        .quiz-content {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .quiz-question {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1e2b3c;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .pairs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .pair-card {
+            background: #f3f7fe;
+            border-radius: 24px;
+            padding: 18px 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            border: 2px solid #d9e6f5;
+            transition: 0.15s;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pair-card.selected {
+            border-color: #3b82f6;
+            background: #dbeafe;
+            box-shadow: 0 6px 14px #3b82f640;
+        }
+
+        .pair-card.matched {
+            border-color: #22c55e;
+            background: #dcfce7;
+            opacity: 0.7;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .pair-card.matched-wrong {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 10px;
+        }
+
+        .option-btn {
+            background: #f3f7fe;
+            border: 2px solid #d9e6f5;
+            border-radius: 20px;
+            padding: 16px 18px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e2b3c;
+            cursor: pointer;
+            transition: 0.12s;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: #e6f0ff;
+            border-color: #b8d1f0;
+        }
+
+        .option-btn.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+
+        .option-btn.wrong {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        .option-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+		
+		.clickable-word {
+    cursor: pointer;
+    transition: 0.15s;
+}
+.clickable-word:hover {
+    color: #3b82f6;
+    text-decoration: underline dotted;
+}
+
+        .input-answer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
+        }
+
+        .input-answer input {
+            padding: 14px 18px;
+            border-radius: 18px;
+            border: 2px solid #cfdbe9;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-answer input:focus {
+            border-color: #3b82f6;
+        }
+
+        .feedback {
+            font-weight: 600;
+            padding: 12px 18px;
+            border-radius: 18px;
+            background: #f0f9ff;
+            color: #0369a1;
+            font-size: 15px;
+        }
+
+        .feedback.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .feedback.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .empty-message {
+            color: #8b9bb0;
+            font-style: italic;
+            padding: 24px 0;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .mt-16 { margin-top: 16px; }
+        .mt-8 { margin-top: 8px; }
+        .mb-8 { margin-bottom: 8px; }
+
+        .transcription-hint {
+            font-size: 14px;
+            color: #6b7a8f;
+        }
+
+        .mic-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 22px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .mic-btn:hover {
+            background: #2563eb;
+        }
+
+        .speak-btn {
+            background: #eef2f9;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .speak-btn:hover {
+            background: #dde5f0;
+        }
+
+        .footer-note {
+            font-size: 12px;
+            color: #b0c0d0;
+            text-align: center;
+            margin-top: 16px;
+        }
+		.option-with-audio {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+.option-with-audio .option-btn {
+    flex: 1;
+}
+.option-audio-btn {
+    background: #eef2f9;
+    border: 2px solid #d9e6f5;
+    border-left: none;
+    border-radius: 0 20px 20px 0;
+    padding: 0 14px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.15s;
+}
+.option-audio-btn:hover {
+    background: #dde5f0;
+}
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="logo">📘 WordDuo</div>
+        <div class="file-actions">
+            <button class="btn" id="saveFileBtn">💾 Сохранить</button>
+            <button class="btn" id="loadFileBtn">📂 Загрузить</button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
+        </div>
+    </div>
+
+    <div class="main-panel" id="mainPanel">
+        <!-- Список папок -->
+        <div class="section-title">
+			📁 Мои папки
+			<button class="btn btn-sm" id="addFolderBtn" style="margin-left: auto;">➕ Папка</button>
+		</div>
+        <div class="folders-grid" id="foldersContainer"></div>
+
+        <!-- Активная папка и слова -->
+        <div id="folderDetail" class="hidden">
+            <div class="section-title" id="activeFolderTitle">Слова</div>
+            <div class="words-list" id="wordsList"></div>
+
+            <!-- Форма добавления слова -->
+            <div class="add-word-form">
+                <div class="input-group">
+                    <label>Английское слово</label>
+                    <input type="text" id="newWordEn" placeholder="apple">
+                </div>
+                <div class="input-group">
+                    <label>Перевод (рус)</label>
+                    <input type="text" id="newWordRu" placeholder="яблоко">
+                </div>
+                <div class="input-group">
+                    <label>Транскрипция (авто)</label>
+                    <input type="text" id="newWordTranscription" placeholder="[ˈæp.əl]">
+                </div>
+                <button class="btn btn-primary" id="addWordBtn" style="padding:12px 26px;">➕ Добавить</button>
+            </div>
+
+            <!-- Квиз -->
+            <div class="quiz-section" id="quizSection">
+                <div class="flex-row" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <span class="level-badge" id="levelBadge">Выберите уровень</span>
+    <div class="flex-row" style="gap: 6px; flex-wrap: wrap;">
+        <button class="btn btn-sm level-btn" data-level="1">1. Пары</button>
+        <button class="btn btn-sm level-btn" data-level="2">2. Рус→Англ</button>
+        <button class="btn btn-sm level-btn" data-level="3">3. Англ→Рус</button>
+        <button class="btn btn-sm level-btn" data-level="4">4. Аудирование</button>
+        <button class="btn btn-sm level-btn" data-level="5">5. Перевод</button>
+        <button class="btn btn-sm level-btn" data-level="6">6. Произношение</button>
+    </div>
+</div>
+                <div id="quizArea">
+                    <div class="empty-message">Нажмите «Начать квиз», чтобы приступить</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ======================== ДАННЫЕ ========================
+    let folders = []; // { id, name, words: [{ en, ru, transcription }] }
+    let activeFolderId = null;
+    let quizState = null; // { level, index, total, questions, ... }
+
+    // ======================== УТИЛИТЫ ========================
+    function generateId() {
+        return Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Простая транскрипция (заглушка, т.к. автоматическая фонетика сложна)
+    // Генерируем что-то похожее на транскрипцию
+    function generateTranscription(word) {
+        if (!word) return '';
+        const clean = word.toLowerCase().trim();
+        // Убираем всё кроме букв
+        const letters = clean.replace(/[^a-z]/g, '');
+        if (!letters) return '';
+
+        // Простейшие правила для видимости работы
+        const map = {
+            'a': 'æ', 'e': 'e', 'i': 'ɪ', 'o': 'ɒ', 'u': 'ʌ',
+            'th': 'θ', 'sh': 'ʃ', 'ch': 'tʃ', 'oo': 'uː', 'ee': 'iː',
+            'ph': 'f', 'ck': 'k', 'ng': 'ŋ', 'wh': 'w', 'qu': 'kw'
+        };
+
+        let trans = letters;
+        // Заменяем двухбуквенные сочетания
+        for (let [key, val] of Object.entries(map)) {
+            if (key.length === 2) {
+                trans = trans.replace(new RegExp(key, 'g'), val);
+            }
+        }
+        // Заменяем одиночные буквы
+        for (let [key, val] of Object.entries(map)) {
+            if (key.length === 1) {
+                trans = trans.replace(new RegExp(key, 'g'), val);
+            }
+        }
+        // Убираем повторяющиеся подряд одинаковые символы
+        trans = trans.replace(/(.)\1+/g, '$1');
+
+        return '[' + trans + ']';
+    }
+
+    // Озвучка через Web Speech API
+    // ======================== ОЗВУЧКА ========================
+let cachedVoices = [];
+
+function refreshVoices() {
+    cachedVoices = window.speechSynthesis.getVoices();
+}
+
+if (window.speechSynthesis) {
+    refreshVoices();
+    window.speechSynthesis.onvoiceschanged = refreshVoices;
+    // Подстраховка: некоторые браузеры отдают голоса с задержкой
+    setTimeout(refreshVoices, 1000);
+}
+
+function speak(text, lang = 'en-US') {
+    if (!text) return;
+    if (!window.speechSynthesis) {
+        console.warn('SpeechSynthesis не поддерживается');
+        return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    utterance.rate = 0.85;
+    utterance.pitch = 1;
+
+    const voices = cachedVoices.length ? cachedVoices : window.speechSynthesis.getVoices();
+    const englishVoice = voices.find(v => v.lang.toLowerCase().startsWith('en'));
+
+    console.log('Озвучка:', text, '| голос:', englishVoice?.name || 'по умолчанию', '| всего голосов:', voices.length);
+
+    if (englishVoice) utterance.voice = englishVoice;
+    utterance.onerror = (e) => console.error('Ошибка озвучки:', e.error);
+    utterance.onstart = () => console.log('Начало озвучки');
+    window.speechSynthesis.speak(utterance);
+}
+
+    // ======================== СОХРАНЕНИЕ / ЗАГРУЗКА ========================
+    function saveToLocalStorage() {
+        localStorage.setItem('wordDuo_folders', JSON.stringify(folders));
+    }
+
+    function loadFromLocalStorage() {
+        const saved = localStorage.getItem('wordDuo_folders');
+        if (saved) {
+            try {
+                folders = JSON.parse(saved);
+            } catch (e) {
+                folders = [];
+            }
+        } else {
+            // Начальные данные для примера
+            folders = [
+                {
+                    id: generateId(),
+                    name: 'Базовые слова',
+                    words: [
+                        { en: 'apple', ru: 'яблоко', transcription: '[ˈæp.əl]' },
+                        { en: 'book', ru: 'книга', transcription: '[bʊk]' },
+                        { en: 'cat', ru: 'кошка', transcription: '[kæt]' },
+                        { en: 'dog', ru: 'собака', transcription: '[dɒɡ]' }
+                    ]
+                },
+                {
+                    id: generateId(),
+                    name: 'Еда',
+                    words: [
+                        { en: 'bread', ru: 'хлеб', transcription: '[bred]' },
+                        { en: 'milk', ru: 'молоко', transcription: '[mɪlk]' }
+                    ]
+                }
+            ];
+        }
+        saveToLocalStorage();
+    }
+
+    function saveToFile() {
+        const dataStr = JSON.stringify({ folders }, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'wordduo_save.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function loadFromFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.folders && Array.isArray(data.folders)) {
+                    folders = data.folders;
+                    activeFolderId = null;
+                    saveToLocalStorage();
+                    renderFolders();
+                    renderFolderDetail();
+                } else {
+                    alert('Неверный формат файла');
+                }
+            } catch (err) {
+                alert('Ошибка чтения файла: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // ======================== РЕНДЕР ПАПОК ========================
+    function renderFolders() {
+        const container = document.getElementById('foldersContainer');
+        if (!folders.length) {
+            container.innerHTML = '<div class="empty-message">Нет папок. Создайте первую!</div>';
+            return;
+        }
+        container.innerHTML = folders.map(f => `
+            <div class="folder-card ${activeFolderId === f.id ? 'active' : ''}" data-folder-id="${f.id}">
+                <div class="folder-name">📁 ${escapeHtml(f.name)}</div>
+                <div class="folder-count">${f.words.length} слов</div>
+                <div class="folder-actions">
+                    <button class="btn btn-sm rename-folder" data-id="${f.id}">✏️</button>
+                    <button class="btn btn-sm btn-danger delete-folder" data-id="${f.id}">🗑️</button>
+                </div>
+            </div>
+        `).join('');
+
+        // Обработчики
+        container.querySelectorAll('.folder-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+        if (e.target.closest('.folder-actions')) return;
+        const id = card.dataset.folderId;
+
+        // Если это уже активная папка — ничего не делаем
+        if (id === activeFolderId) return;
+
+        // Если идёт квиз — предупреждаем
+        if (quizState && !confirm('Квиз будет сброшен. Продолжить?')) return;
+
+        activeFolderId = id;
+        renderFolders();
+        renderFolderDetail();
+    });
+});
+
+        container.querySelectorAll('.rename-folder').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.dataset.id;
+                const folder = folders.find(f => f.id === id);
+                const newName = prompt('Новое название папки:', folder.name);
+                if (newName && newName.trim()) {
+                    folder.name = newName.trim();
+                    saveToLocalStorage();
+                    renderFolders();
+                    renderFolderDetail();
+                }
+            });
+        });
+
+        container.querySelectorAll('.delete-folder').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.dataset.id;
+                if (confirm('Удалить папку со всеми словами?')) {
+                    folders = folders.filter(f => f.id !== id);
+                    if (activeFolderId === id) activeFolderId = null;
+                    saveToLocalStorage();
+                    renderFolders();
+                    renderFolderDetail();
+                }
+            });
+        });
+    }
+
+    // ======================== РЕНДЕР СЛОВ ========================
+    function renderFolderDetail() {
+        const detail = document.getElementById('folderDetail');
+        const title = document.getElementById('activeFolderTitle');
+        const wordsList = document.getElementById('wordsList');
+        const folder = folders.find(f => f.id === activeFolderId);
+
+        if (!folder) {
+            detail.classList.add('hidden');
+            return;
+        }
+        detail.classList.remove('hidden');
+        title.textContent = `📁 ${folder.name} — слова (${folder.words.length})`;
+
+        if (!folder.words.length) {
+            wordsList.innerHTML = '<div class="empty-message">Нет слов. Добавьте первое!</div>';
+        } else {
+            wordsList.innerHTML = folder.words.map((w, idx) => `
+                <div class="word-row">
+                    <span class="word-en">${escapeHtml(w.en)}</span>
+                    <span class="word-transcription">${escapeHtml(w.transcription || '')}</span>
+                    <span class="word-ru">${escapeHtml(w.ru)}</span>
+                    <button class="word-audio-btn" data-word="${escapeHtml(w.en)}">🔊</button>
+                    <button class="btn btn-sm edit-word" data-edit-word="${idx}">✏️</button>
+					<button class="btn btn-sm btn-danger" data-remove-word="${idx}">✖</button>
+                </div>
+            `).join('');
+
+            wordsList.querySelectorAll('.word-audio-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    speak(btn.dataset.word);
+                });
+            });
+
+            wordsList.querySelectorAll('[data-edit-word]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.editWord);
+        const w = folder.words[idx];
+
+        const newEn = prompt('Английское слово:', w.en);
+        if (newEn === null) return;
+        const newRu = prompt('Перевод (рус):', w.ru);
+        if (newRu === null) return;
+        const newTr = prompt('Транскрипция:', w.transcription || '');
+
+        // Валидация
+        if (!newEn.trim() || !newRu.trim()) {
+            alert('Английское слово и перевод не могут быть пустыми');
+            return;
+        }
+
+        folder.words[idx] = {
+            en: newEn.trim(),
+            ru: newRu.trim(),
+            transcription: newTr !== null ? newTr.trim() : ''
+        };
+
+        saveToLocalStorage();
+        renderFolderDetail();
+        renderFolders();
+    });
+});
+        }
+
+        // Сброс квиза при смене папки
+        resetQuiz();
+    }
+
+    // ======================== ДОБАВЛЕНИЕ СЛОВА ========================
+    document.getElementById('addWordBtn').addEventListener('click', () => {
+        const folder = folders.find(f => f.id === activeFolderId);
+        if (!folder) return;
+
+        const en = document.getElementById('newWordEn').value.trim();
+        const ru = document.getElementById('newWordRu').value.trim();
+        let transcription = document.getElementById('newWordTranscription').value.trim();
+
+        if (!en || !ru) {
+            alert('Заполните английское слово и перевод');
+            return;
+        }
+
+        if (!transcription) {
+            transcription = generateTranscription(en);
+        }
+
+        folder.words.push({ en, ru, transcription });
+        saveToLocalStorage();
+		transcriptionManuallyEdited = false;
+        document.getElementById('newWordEn').value = '';
+        document.getElementById('newWordRu').value = '';
+        document.getElementById('newWordTranscription').value = '';
+        renderFolderDetail();
+        renderFolders();
+    });
+
+    // Автогенерация транскрипции при вводе
+let transcriptionManuallyEdited = false;
+
+document.getElementById('newWordEn').addEventListener('input', (e) => {
+    if (transcriptionManuallyEdited) return;
+    const val = e.target.value.trim();
+    const field = document.getElementById('newWordTranscription');
+
+    if (!val) {
+        field.value = '';
+        return;
+    }
+
+    // Сначала пробуем точный IPA из словаря
+    const exact = lookupIpa(val);
+    // Если не нашли — упрощённая генерация
+    field.value = exact || generateTranscription(val);
+});
+
+document.getElementById('newWordTranscription').addEventListener('input', () => {
+    transcriptionManuallyEdited = true;
+});
+
+    // ======================== СОЗДАНИЕ ПАПКИ ========================
+    document.getElementById('foldersContainer').addEventListener('dblclick', (e) => {
+        // Двойной клик по пустому месту создаёт папку (только если не попали в карточку)
+        if (e.target.closest('.folder-card')) return;
+        const name = prompt('Название новой папки:');
+        if (name && name.trim()) {
+            folders.push({ id: generateId(), name: name.trim(), words: [] });
+            saveToLocalStorage();
+            renderFolders();
+        }
+    });
+
+    // Кнопка добавления папки (можно добавить в интерфейс)
+    // Но добавим горячую кнопку через заголовок
+    // (опционально) — создадим кнопку рядом с заголовком
+    // Изменим заголовок:
+    document.getElementById('addFolderBtn').addEventListener('click', () => {
+    const name = prompt('Название новой папки:');
+    if (name && name.trim()) {
+        folders.push({ id: generateId(), name: name.trim(), words: [] });
+        saveToLocalStorage();
+        renderFolders();
+    }
+});
+
+    // ======================== КВИЗ ========================
+    function resetQuiz() {
+    quizState = null;
+    document.getElementById('quizArea').innerHTML = '<div class="empty-message">Нажмите «Начать квиз», чтобы приступить</div>';
+    document.getElementById('levelBadge').textContent = 'Уровень 1 — Пары';
+}
+
+    function startQuiz(level = 1) {
+	// Отменяем все отложенные переходы от предыдущего квиза
+    if (window.__quizTimer) clearTimeout(window.__quizTimer);
+    window.__quizTimer = null;
+        const folder = folders.find(f => f.id === activeFolderId);
+        if (!folder || folder.words.length < 1) {
+            alert('Добавьте хотя бы одно слово в папку');
+            return;
+        }
+
+        // Для уровней, где нужно 4 варианта, проверим минимум 2 слова (для 4 вариантов лучше 4)
+        if ([2, 3].includes(level) && folder.words.length < 4) {
+    alert('Для этого уровня нужно минимум 4 слова в папке (чтобы было 4 варианта ответа)');
+    return;
+}
+
+
+
+
+        const words = folder.words.map(w => ({ ...w }));
+        // Перемешаем
+        shuffleArray(words);
+
+        let questions = [];
+        let total = words.length;
+
+        if (level === 1) {
+            // Пары: берём все слова, но для пар нужно чётное количество? Нет, просто составляем пары
+            // Будем показывать по 4 пары за раз? Лучше классический вариант: все слова в виде пар.
+            // Но для простоты сделаем последовательные раунды по 4 пары.
+            // Однако чтобы не усложнять, сделаем все слова сразу парами (если слов много, будет длинная сетка).
+            // Улучшим: разбиваем на раунды по 4 пары (8 карточек)
+            // Но для простоты и наглядности сделаем все пары сразу, но если слов > 8, то это будет громоздко.
+            // Сделаем раунды по 4 пары.
+            const pairs = [];
+let i = 0;
+while (i < words.length) {
+    let chunk = words.slice(i, i + 4);
+    // Если осталось 1 слово и есть предыдущий раунд — добавим к нему
+    if (chunk.length === 1 && pairs.length > 0) {
+        pairs[pairs.length - 1].push(chunk[0]);
+    } else if (chunk.length >= 2) {
+        pairs.push(chunk);
+    } else if (chunk.length === 1 && pairs.length === 0) {
+        // всего 1 слово в папке — пар не сделать
+        alert('Для уровня 1 нужно минимум 2 слова');
+        return;
+    }
+    i += 4;
+}
+            if (pairs.length === 0) {
+                alert('Недостаточно слов для составления пар (нужно хотя бы 2)');
+                return;
+            }
+            // Инициализируем состояние
+            quizState = {
+                level: 1,
+                rounds: pairs,
+                currentRound: 0,
+                totalRounds: pairs.length,
+                // Для текущего раунда
+                enCards: [],
+                ruCards: [],
+                selectedEn: null,
+                selectedRu: null,
+                matchedPairs: new Set(),
+                wrongPair: null,
+                roundWords: []
+            };
+            renderQuizLevel1();
+            document.getElementById('levelBadge').textContent = 'Уровень 1 — Найди пары';
+        } else if (level === 2) {
+            // Тест: рус -> англ (4 варианта)
+            questions = words.map(w => {
+                const correct = w.en;
+                const options = [correct];
+                // Добавляем 3 неверных из других слов
+                const others = words.filter(x => x.en !== correct).map(x => x.en);
+                shuffleArray(others);
+                for (let o of others) {
+                    if (options.length >= 4) break;
+                    if (!options.includes(o)) options.push(o);
+                }
+                // Если не хватило, добавим заглушки
+                while (options.length < 4) options.push('—');
+                shuffleArray(options);
+                return { question: w.ru, correct: correct, options, word: w };
+            });
+            shuffleArray(questions);
+            quizState = { level: 2, questions, index: 0, total: questions.length };
+            renderQuizLevel2();
+            document.getElementById('levelBadge').textContent = 'Уровень 2 — Рус → Англ (тест)';
+        } else if (level === 3) {
+            // Тест: англ -> рус
+            questions = words.map(w => {
+                const correct = w.ru;
+                const options = [correct];
+                const others = words.filter(x => x.ru !== correct).map(x => x.ru);
+                shuffleArray(others);
+                for (let o of others) {
+                    if (options.length >= 4) break;
+                    if (!options.includes(o)) options.push(o);
+                }
+                while (options.length < 4) options.push('—');
+                shuffleArray(options);
+                return { question: w.en, correct: correct, options, word: w };
+            });
+            shuffleArray(questions);
+            quizState = { level: 3, questions, index: 0, total: questions.length };
+            renderQuizLevel3();
+            document.getElementById('levelBadge').textContent = 'Уровень 3 — Англ → Рус (тест)';
+        } else if (level === 4) {
+            // Аудирование + перевод
+            questions = words.map(w => ({ word: w }));
+            shuffleArray(questions);
+            quizState = { level: 4, questions, index: 0, total: questions.length };
+            renderQuizLevel4();
+            document.getElementById('levelBadge').textContent = 'Уровень 4 — Аудирование + перевод';
+        } else if (level === 5) {
+            // Ввод перевода на английский
+            questions = words.map(w => ({ word: w }));
+            shuffleArray(questions);
+            quizState = { level: 5, questions, index: 0, total: questions.length };
+            renderQuizLevel5();
+            document.getElementById('levelBadge').textContent = 'Уровень 5 — Перевод на английский';
+        } else if (level === 6) {
+            // Произношение
+            questions = words.map(w => ({ word: w }));
+            shuffleArray(questions);
+            quizState = { level: 6, questions, index: 0, total: questions.length };
+            renderQuizLevel6();
+            document.getElementById('levelBadge').textContent = 'Уровень 6 — Произношение';
+        }
+    }
+
+    // ----- Уровень 1: Пары -----
+    function renderQuizLevel1() {
+        const area = document.getElementById('quizArea');
+        if (!quizState || quizState.level !== 1) return;
+
+        const round = quizState.rounds[quizState.currentRound];
+        if (!round) {
+            area.innerHTML = '<div class="feedback success">🎉 Все пары найдены! Отличная работа!</div>';
+            return;
+        } else {
+    document.getElementById('quizArea').innerHTML = '<div class="feedback success">🎉 Все пары найдены! Отличная работа!</div>';
+      // ← ДОБАВИТЬ
+}
+
+        // Подготовим карточки для текущего раунда
+        const enCards = round.map(w => ({ text: w.en, pairId: w.en, word: w }));
+        const ruCards = round.map(w => ({ text: w.ru, pairId: w.en, word: w }));
+        shuffleArray(enCards);
+        shuffleArray(ruCards);
+
+        quizState.roundWords = round;
+        quizState.enCards = enCards;
+        quizState.ruCards = ruCards;
+        quizState.selectedEn = null;
+        quizState.selectedRu = null;
+        quizState.matchedPairs = new Set();
+
+        renderLevel1Grid();
+    }
+
+    function renderLevel1Grid() {
+        const area = document.getElementById('quizArea');
+        const { enCards, ruCards, matchedPairs, selectedEn, selectedRu, wrongPair } = quizState;
+
+        const enHtml = enCards.map((c, i) => {
+            const matched = matchedPairs.has(c.pairId);
+            const selected = selectedEn === i;
+            const wrong = wrongPair && wrongPair.en === i;
+            return `<div class="pair-card ${matched ? 'matched' : ''} ${selected ? 'selected' : ''} ${wrong ? 'matched-wrong' : ''}" data-type="en" data-index="${i}" data-pair="${c.pairId}">
+                ${escapeHtml(c.text)} ${matched ? '✓' : ''}
+            </div>`;
+        }).join('');
+
+        const ruHtml = ruCards.map((c, i) => {
+            const matched = matchedPairs.has(c.pairId);
+            const selected = selectedRu === i;
+            const wrong = wrongPair && wrongPair.ru === i;
+            return `<div class="pair-card ${matched ? 'matched' : ''} ${selected ? 'selected' : ''} ${wrong ? 'matched-wrong' : ''}" data-type="ru" data-index="${i}" data-pair="${c.pairId}">
+                ${escapeHtml(c.text)} ${matched ? '✓' : ''}
+            </div>`;
+        }).join('');
+
+        area.innerHTML = `
+            <div class="quiz-progress">Раунд ${quizState.currentRound + 1} из ${quizState.totalRounds}</div>
+            <div class="pairs-grid">
+                <div style="display:flex; flex-direction:column; gap:12px;">${enHtml}</div>
+                <div style="display:flex; flex-direction:column; gap:12px;">${ruHtml}</div>
+            </div>
+            <div class="feedback mt-16">Нажимайте на английское слово, чтобы услышать произношение. Соединяйте пары.</div>
+        `;
+
+        // Обработчики
+        area.querySelectorAll('.pair-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const type = card.dataset.type;
+                const index = parseInt(card.dataset.index);
+                const pairId = card.dataset.pair;
+                if (quizState.matchedPairs.has(pairId)) return;
+
+                if (type === 'en') {
+                    // Озвучка
+                    const wordObj = quizState.enCards[index];
+                    if (wordObj) speak(wordObj.text);
+                    // Выбор
+                    if (quizState.selectedEn === index) {
+                        quizState.selectedEn = null;
+                    } else {
+                        quizState.selectedEn = index;
+                    }
+                } else {
+                    if (quizState.selectedRu === index) {
+                        quizState.selectedRu = null;
+                    } else {
+                        quizState.selectedRu = index;
+                    }
+                }
+                quizState.wrongPair = null;
+                checkPairMatch();
+            });
+        });
+    }
+
+    function checkPairMatch() {
+        const { selectedEn, selectedRu, enCards, ruCards, matchedPairs } = quizState;
+        if (selectedEn === null || selectedRu === null) {
+            renderLevel1Grid();
+            return;
+        }
+        const enCard = enCards[selectedEn];
+        const ruCard = ruCards[selectedRu];
+        if (enCard.pairId === ruCard.pairId) {
+            // Совпадение
+            matchedPairs.add(enCard.pairId);
+            quizState.selectedEn = null;
+            quizState.selectedRu = null;
+            quizState.wrongPair = null;
+            if (matchedPairs.size === quizState.roundWords.length) {
+                // Раунд завершён
+                window.__quizTimer = setTimeout(() => {
+                    if (quizState.currentRound + 1 < quizState.totalRounds) {
+                        quizState.currentRound++;
+                        renderQuizLevel1();
+                    } else {
+                        document.getElementById('quizArea').innerHTML = '<div class="feedback success">🎉 Все пары найдены! Отличная работа!</div>';
+						
+                    }
+                }, 500);
+            } else {
+                renderLevel1Grid();
+            }
+        } else {
+            // Несовпадение
+            quizState.wrongPair = { en: selectedEn, ru: selectedRu };
+renderLevel1Grid();
+setTimeout(() => {
+    quizState.selectedEn = null;
+    quizState.selectedRu = null;
+    quizState.wrongPair = null;
+    renderLevel1Grid();
+}, 600);
+        }
+    }
+
+    // ----- Уровень 2: Рус -> Англ (тест) -----
+function renderQuizLevel2() {
+    const area = document.getElementById('quizArea');
+    if (!quizState || quizState.level !== 2) return;
+    const q = quizState.questions[quizState.index];
+    if (!q) {
+        area.innerHTML = '<div class="feedback success">🎉 Тест завершён! Отличная работа!</div>';
+        return;
+    }
+
+    area.innerHTML = `
+        <div class="quiz-progress">Вопрос ${quizState.index + 1} из ${quizState.total}</div>
+        <div class="quiz-question">${escapeHtml(q.question)}</div>
+        <div class="options-grid">
+            ${q.options.map(opt => `
+                <div class="option-with-audio">
+                    <button class="option-btn" data-opt="${escapeHtml(opt)}">${escapeHtml(opt)}</button>
+                    <button class="option-audio-btn" data-audio="${escapeHtml(opt)}" title="Прослушать">🔊</button>
+                </div>
+            `).join('')}
+        </div>
+        <div class="feedback hidden" id="quizFeedback"></div>
+    `;
+
+    area.querySelectorAll('.option-audio-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            speak(btn.dataset.audio);
+        });
+    });
+
+    area.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const selected = btn.dataset.opt;
+            const isCorrect = selected === q.correct;
+
+            area.querySelectorAll('.option-btn').forEach(b => {
+                b.disabled = true;
+                if (b.dataset.opt === q.correct) b.classList.add('correct');
+                if (b.dataset.opt === selected && !isCorrect) b.classList.add('wrong');
+            });
+
+            speak(q.correct);
+
+            const fb = document.getElementById('quizFeedback');
+            if (fb) {
+                fb.textContent = isCorrect
+                    ? '✅ Верно!'
+                    : `❌ Ошибка. Правильно: ${q.correct} (вернёмся к этому вопросу позже)`;
+                fb.className = 'feedback mt-16 ' + (isCorrect ? 'success' : 'error');
+                fb.classList.remove('hidden');
+            }
+
+            window.__quizTimer = setTimeout(() => {
+                if (isCorrect) {
+                    quizState.index++;
+                } else {
+                    moveCurrentQuestionToEnd();
+                }
+                renderQuizLevel2();
+            }, 1200);
+        });
+    });
+}
+
+    // ----- Уровень 3: Англ -> Рус (тест) -----
+function renderQuizLevel3() {
+    const area = document.getElementById('quizArea');
+    if (!quizState || quizState.level !== 3) return;
+    const q = quizState.questions[quizState.index];
+    if (!q) {
+        area.innerHTML = '<div class="feedback success">🎉 Тест завершён! Отличная работа!</div>';
+        return;
+    }
+
+    area.innerHTML = `
+        <div class="quiz-progress">Вопрос ${quizState.index + 1} из ${quizState.total}</div>
+        <div class="quiz-question">
+            <span class="clickable-word" id="questionWord">${escapeHtml(q.question)}</span>
+            <button class="speak-btn" id="speakQuestionBtn">🔊</button>
+        </div>
+        <div class="options-grid">
+            ${q.options.map(opt => `<button class="option-btn" data-opt="${escapeHtml(opt)}">${escapeHtml(opt)}</button>`).join('')}
+        </div>
+        <div class="feedback hidden" id="quizFeedback"></div>
+    `;
+
+    document.getElementById('speakQuestionBtn')?.addEventListener('click', () => speak(q.question));
+    document.getElementById('questionWord')?.addEventListener('click', () => speak(q.question));
+
+    area.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const selected = btn.dataset.opt;
+            const isCorrect = selected === q.correct;
+
+            area.querySelectorAll('.option-btn').forEach(b => {
+                b.disabled = true;
+                if (b.dataset.opt === q.correct) b.classList.add('correct');
+                if (b.dataset.opt === selected && !isCorrect) b.classList.add('wrong');
+            });
+
+            const fb = document.getElementById('quizFeedback');
+            if (fb) {
+                fb.textContent = isCorrect
+                    ? '✅ Верно!'
+                    : `❌ Ошибка. Правильно: ${q.correct} (вернёмся к этому вопросу позже)`;
+                fb.className = 'feedback mt-16 ' + (isCorrect ? 'success' : 'error');
+                fb.classList.remove('hidden');
+            }
+
+            window.__quizTimer = setTimeout(() => {
+                if (isCorrect) {
+                    quizState.index++;
+                } else {
+                    moveCurrentQuestionToEnd();
+                }
+                renderQuizLevel3();
+            }, 1200);
+        });
+    });
+}
+
+    // ----- Уровень 4: Аудирование + перевод -----
+function renderQuizLevel4() {
+    const area = document.getElementById('quizArea');
+    if (!quizState || quizState.level !== 4) return;
+    const q = quizState.questions[quizState.index];
+    if (!q) {
+        area.innerHTML = '<div class="feedback success">🎉 Уровень пройден! Отличная работа!</div>';
+        return;
+    }
+
+    area.innerHTML = `
+        <div class="quiz-progress">Вопрос ${quizState.index + 1} из ${quizState.total}</div>
+        <div class="quiz-question">
+            <button class="speak-btn" id="playAudioBtn">🔊 Прослушать слово</button>
+        </div>
+        <div class="input-answer">
+            <input type="text" id="answerEn" placeholder="Напишите слово на английском" autocomplete="off" autofocus>
+            <input type="text" id="answerRu" placeholder="Напишите перевод на русском" autocomplete="off">
+            <button class="btn btn-primary" id="checkAnswerBtn">Проверить</button>
+        </div>
+        <div class="feedback hidden" id="quizFeedback"></div>
+    `;
+
+    speak(q.word.en);
+    document.getElementById('playAudioBtn').addEventListener('click', () => speak(q.word.en));
+
+    ['answerEn', 'answerRu'].forEach(id => {
+        document.getElementById(id).addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('checkAnswerBtn').click();
+        });
+    });
+
+    document.getElementById('checkAnswerBtn').addEventListener('click', () => {
+        const enAnswer = normalize(document.getElementById('answerEn').value);
+        const ruAnswer = normalize(document.getElementById('answerRu').value);
+        const correctEn = normalize(q.word.en);
+        const correctRu = normalize(q.word.ru);
+
+        const fb = document.getElementById('quizFeedback');
+
+        if (!enAnswer && !ruAnswer) {
+            fb.textContent = 'Введите ответ хотя бы в одно поле';
+            fb.className = 'feedback mt-16 error';
+            fb.classList.remove('hidden');
+            return;
+        }
+
+        const enOk = enAnswer === correctEn;
+        const ruOk = ruAnswer === correctRu;
+        const allOk = enOk && ruOk;
+
+        if (allOk) {
+            fb.textContent = '✅ Верно! Оба поля правильные.';
+            fb.className = 'feedback mt-16 success';
+        } else {
+            let msg = '❌ Ошибки: ';
+            if (!enOk) msg += `английский (правильно: ${q.word.en}), `;
+            if (!ruOk) msg += `русский (правильно: ${q.word.ru}), `;
+            fb.textContent = msg.slice(0, -2) + ' (вернёмся к этому вопросу позже)';
+            fb.className = 'feedback mt-16 error';
+        }
+        fb.classList.remove('hidden');
+
+        speak(q.word.en);
+
+        window.__quizTimer = setTimeout(() => {
+            if (allOk) {
+                quizState.index++;
+            } else {
+                moveCurrentQuestionToEnd();
+            }
+            renderQuizLevel4();
+        }, 1800);
+    });
+}
+
+    // ----- Уровень 5: Перевод на английский (ввод) -----
+function renderQuizLevel5() {
+    const area = document.getElementById('quizArea');
+    if (!quizState || quizState.level !== 5) return;
+    const q = quizState.questions[quizState.index];
+    if (!q) {
+        area.innerHTML = '<div class="feedback success">🎉 Тест завершён! Отличная работа!</div>';
+        return;
+    }
+
+    area.innerHTML = `
+        <div class="quiz-progress">Вопрос ${quizState.index + 1} из ${quizState.total}</div>
+        <div class="quiz-question">${escapeHtml(q.word.ru)}</div>
+        <div class="input-answer">
+            <input type="text" id="answerEn" placeholder="Введите перевод на английский" autocomplete="off" autofocus>
+            <button class="btn btn-primary" id="checkAnswerBtn">Проверить</button>
+        </div>
+        <div class="feedback hidden" id="quizFeedback"></div>
+    `;
+
+    // Enter запускает проверку
+    document.getElementById('answerEn').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('checkAnswerBtn').click();
+    });
+
+    document.getElementById('checkAnswerBtn').addEventListener('click', () => {
+        const answer = normalize(document.getElementById('answerEn').value);
+        const correct = normalize(q.word.en);
+        const isCorrect = answer === correct;
+
+        const fb = document.getElementById('quizFeedback');
+        if (isCorrect) {
+            fb.textContent = '✅ Верно!';
+            fb.className = 'feedback mt-16 success';
+        } else {
+            fb.textContent = `❌ Ошибка. Правильно: ${q.word.en} (вернёмся к этому вопросу позже)`;
+            fb.className = 'feedback mt-16 error';
+        }
+        fb.classList.remove('hidden');
+        speak(q.word.en);
+
+        window.__quizTimer = setTimeout(() => {
+            if (isCorrect) {
+                quizState.index++;
+            } else {
+                moveCurrentQuestionToEnd();
+            }
+            renderQuizLevel5();
+        }, 1500);
+    });
+}
+
+    // ----- Уровень 6: Произношение -----
+    function renderQuizLevel6() {
+    const area = document.getElementById('quizArea');
+    if (!quizState || quizState.level !== 6) return;
+    const q = quizState.questions[quizState.index];
+    if (!q) {
+    area.innerHTML = '<div class="feedback success">🎉 Тест завершён! Отличная работа!</div>';
+      // ← ДОБАВИТЬ
+    return;
+}
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const supported = !!SR;
+
+    area.innerHTML = `
+        <div class="quiz-progress">Вопрос ${quizState.index + 1} из ${quizState.total}</div>
+        <div class="quiz-question">
+    <span class="clickable-word" id="questionWord">${escapeHtml(q.word.en)}</span>
+    <button class="speak-btn" id="playWordBtn">🔊</button>
+</div>
+        <div class="mt-16 flex-row">
+            <button class="mic-btn" id="startRecordBtn" ${supported ? '' : 'disabled'}>🎤 Произнести</button>
+            <span id="recordingStatus" class="transcription-hint">${supported ? '' : 'Браузер не поддерживает распознавание речи'}</span>
+        </div>
+        <div class="feedback hidden mt-16" id="quizFeedback"></div>
+    `;
+    document.getElementById('playWordBtn')?.addEventListener('click', () => speak(q.word.en));
+	document.getElementById('questionWord')?.addEventListener('click', () => speak(q.word.en));
+
+    document.getElementById('startRecordBtn').addEventListener('click', async () => {
+        if (!supported) return;
+    const status = document.getElementById('recordingStatus');
+    const fb = document.getElementById('quizFeedback');
+
+    // Явно запрашиваем доступ к микрофону
+    try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+        status.textContent = 'Микрофон недоступен. Разреши доступ в настройках браузера.';
+        return;
+    }
+
+    const recognition = new SR();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    status.textContent = '🎙️ Говорите...';
+    fb.classList.add('hidden');
+    recognition.start();
+
+        recognition.onresult = (event) => {
+            const spoken = event.results[0][0].transcript.trim().toLowerCase();
+            const target = q.word.en.trim().toLowerCase();
+            const isCorrect = spoken === target;
+            status.textContent = `Вы сказали: «${spoken}»`;
+            if (isCorrect) {
+                fb.textContent = '✅ Отлично! Произношение верное.';
+                fb.className = 'feedback mt-16 success';
+            } else {
+                fb.textContent = `❌ Похоже, вы сказали «${spoken}». Правильно: ${q.word.en}`;
+                fb.className = 'feedback mt-16 error';
+            }
+            fb.classList.remove('hidden');
+            speak(q.word.en);
+            window.__quizTimer = setTimeout(() => {
+    quizState.index++;
+    renderQuizLevel6(); // или 5, или 6 — по контексту
+}, 1200);
+        };
+
+        recognition.onerror = (e) => {
+    const errorMap = {
+        'not-allowed': 'Микрофон заблокирован. Разреши доступ в настройках браузера.',
+        'service-not-allowed': 'Браузер не разрешает распознавание речи. Попробуй Chrome или Edge.',
+        'language-not-supported': 'Английский язык не поддерживается движком распознавания.',
+        'network': 'Нет соединения. Распознавание речи работает через интернет.',
+        'no-speech': 'Ничего не услышано. Попробуй ещё раз и говори громче.',
+        'audio-capture': 'Не удалось получить доступ к микрофону. Проверь, что он подключён.',
+        'aborted': 'Запись прервана.'
+    };
+    status.textContent = errorMap[e.error] || ('Ошибка: ' + e.error);
+};
+
+        recognition.onend = () => {
+            if (status.textContent === '🎙️ Говорите...') {
+                status.textContent = 'Ничего не распознано, попробуйте снова';
+            }
+        };
+    });
+}
+
+    // ======================== ВСПОМОГАТЕЛЬНЫЕ ========================
+	
+	function moveCurrentQuestionToEnd() {
+    if (!quizState || !quizState.questions) return;
+    const i = quizState.index;
+    const q = quizState.questions.splice(i, 1)[0];
+    quizState.questions.push(q);
+    // index НЕ увеличиваем — на его месте теперь следующий вопрос
+}
+	
+	// ======================== IPA-СЛОВАРЬ ========================
+const IPA_DICT_URL = 'https://raw.githubusercontent.com/amortoplegstitan/eng_words/refs/heads/main/en_US.txt';
+
+let ipaDictionary = null; // Map для TXT или объект для JSON
+
+async function loadIpaDictionary() {
+    try {
+        const res = await fetch(IPA_DICT_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+
+        ipaDictionary = new Map();
+        for (const line of text.split('\n')) {
+            const tab = line.indexOf('\t');
+            if (tab === -1) continue;
+            const word = line.slice(0, tab).trim().toLowerCase();
+            const ipa = line.slice(tab + 1).trim().split(',')[0].trim();
+            if (word && ipa) ipaDictionary.set(word, ipa);
+        }
+        console.log(`✅ Загружено ${ipaDictionary.size} слов из IPA-словаря`);
+    } catch (e) {
+        console.warn('⚠️ IPA-словарь не загружен:', e.message);
+        ipaDictionary = null;
+    }
+}
+
+function lookupIpa(word) {
+    if (!ipaDictionary || !word) return null;
+    return ipaDictionary.get(word.trim().toLowerCase()) || null;
+}
+
+function lookupIpa(word) {
+    if (!ipaDictionary || !word) return null;
+    return ipaDictionary.get(word.trim().toLowerCase()) || null;
+}
+
+loadIpaDictionary();
+	
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+	
+	function normalize(str) {
+    return (str || '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ')       // несколько пробелов → один
+        .replace(/[.,!?;:'"’]/g, ''); // убрать пунктуацию
+}
+
+
+
+async function fetchTranscription(word) {
+    try {
+        const res = await fetch(
+            `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.trim().toLowerCase())}`
+        );
+        if (!res.ok) return null;
+        const data = await res.json();
+        const entry = data[0];
+        if (!entry) return null;
+
+        // Прямое поле phonetic
+        if (entry.phonetic) return entry.phonetic;
+
+        // Иначе ищем в phonetics[]
+        if (Array.isArray(entry.phonetics)) {
+            const withText = entry.phonetics.find(p => p.text);
+            if (withText) return withText.text;
+        }
+        return null;
+    } catch (e) {
+        console.warn('Не удалось получить транскрипцию для', word, e);
+        return null;
+    }
+}
+
+
+    // ======================== ОБРАБОТЧИКИ ========================
+    document.querySelectorAll('.level-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Если идёт квиз — предупреждаем
+        if (quizState && !confirm('Начать новый квиз? Текущий прогресс будет потерян.')) {
+            return;
+        }
+        const level = parseInt(btn.dataset.level);
+        startQuiz(level);
+    });
+});
+
+    document.getElementById('saveFileBtn').addEventListener('click', saveToFile);
+    document.getElementById('loadFileBtn').addEventListener('click', () => {
+        document.getElementById('fileInput').click();
+    });
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            loadFromFile(file);
+            e.target.value = '';
+        }
+    });
+
+    // Инициализация
+    loadFromLocalStorage();
+    renderFolders();
+
+    // При загрузке страницы, если есть папки, но нет активной — не показываем детали
+    // Если хотим автоматически выбрать первую папку, раскомментируем:
+    if (folders.length > 0 && !activeFolderId) {
+        // Не выбираем автоматически, пусть пользователь кликнет
+    }
+
+    // Предзагрузка голосов
+    if (window.speechSynthesis) {
+        window.speechSynthesis.getVoices();
+    }
+
+    // Сохранение при закрытии
+    window.addEventListener('beforeunload', () => {
+        saveToLocalStorage();
+    });
+</script>
+</body>
+</html>
