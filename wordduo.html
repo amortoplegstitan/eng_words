@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
     <script type="module">
-  import * as tts from 'https://cdn.jsdelivr.net/npm/@realtimex/piper-tts-web@1.1.1/+esm';
-  window.PiperTTS = tts;
+  import { PiperWebEngine, OnnxWebGPURuntime } from 'https://cdn.jsdelivr.net/npm/piper-tts-web@1.1.2/+esm';
+  
+  window.PiperTTS = { PiperWebEngine, OnnxWebGPURuntime };
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -670,12 +671,15 @@ let piperReady = false;
 
 async function initPiper() {
     try {
-        if (!window.PiperTTS) {
-            console.warn('Piper TTS библиотека не загружена');
-            return;
-        }
+        const { PiperWebEngine, OnnxWebGPURuntime } = window.PiperTTS;
+        
+        const engine = new PiperWebEngine({
+            onnxRuntime: new OnnxWebGPURuntime()
+        });
+        
+        window.piperEngine = engine;
         piperReady = true;
-        console.log('Piper TTS инициализирован');
+        console.log('Piper TTS инициализирован с WebGPU');
     } catch (e) {
         console.warn('Ошибка инициализации Piper:', e.message);
         piperReady = false;
