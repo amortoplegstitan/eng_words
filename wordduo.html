@@ -681,7 +681,23 @@ async function initPiper() {
 
 
 // Запускаем инициализацию сразу
-initPiper();
+function waitForPiper(maxAttempts = 50) {
+    let attempts = 0;
+    const check = () => {
+        if (window.PiperTTS) {
+            console.log('Piper TTS модуль появился, инициализирую...');
+            initPiper();
+        } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(check, 100);
+        } else {
+            console.warn('Piper TTS так и не загрузился за 5 секунд');
+        }
+    };
+    check();
+}
+
+waitForPiper();
 
     
     // ======================== ОЗВУЧКА ========================
