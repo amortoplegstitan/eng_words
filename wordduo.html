@@ -669,18 +669,13 @@ let piperEngine = null;
 let piperReady = false;
 
 async function initPiper() {
-    try {
-        if (!window.PiperTTS) {
-            console.warn('Piper TTS библиотека не загружена');
-            return;
-        }
-        piperReady = true;
-        console.log('Piper TTS инициализирован');
-        console.log('Доступные экспорты:', Object.keys(window.PiperTTS));
-    } catch (e) {
-        console.warn('Ошибка инициализации Piper:', e.message);
-        piperReady = false;
+    if (!window.PiperTTS) {
+        console.warn('Piper TTS библиотека не загружена');
+        return;
     }
+    piperReady = true;
+    console.log('Piper TTS готов. Экспорты:', Object.keys(window.PiperTTS));
+    console.log('predict доступен:', typeof window.PiperTTS.predict === 'function');
 }
 
 
@@ -715,23 +710,22 @@ function speakSystem(text, lang = 'ru-RU') {
 async function speakEnglish(text) {
     if (!text) return;
 
-    if (!piperReady || !window.PiperTTS) {
+    if (!piperReady || !window.PiperTTS || typeof window.PiperTTS.predict !== 'function') {
         console.warn('Piper не готов, использую системный TTS');
         speakSystem(text, 'en-US');
         return;
     }
 
     try {
-        // Используем метод predict из библиотеки
         const wav = await window.PiperTTS.predict({
             text: text,
             voiceId: 'en_US-lessac-medium'
         });
-
         const audio = new Audio(URL.createObjectURL(wav));
         audio.play();
+        audio.onended = () => URL.revokeObjectURL(audio.src);
     } catch (e) {
-        console.warn('Ошибка Piper, использую системный TTS:', e.message);
+        console.warn('Ошибка Piper:', e.message);
         speakSystem(text, 'en-US');
     }
 }
