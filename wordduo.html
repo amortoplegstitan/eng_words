@@ -1,21 +1,18 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <script type="importmap">
-{
-  "imports": {
-    "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/esm/ort.min.mjs",
-    "onnxruntime-web/wasm": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/esm/ort.wasm.min.mjs"
-  }
-}
-</script>
-    <script type="module">
-  import * as tts from 'https://cdn.jsdelivr.net/npm/@realtimex/piper-tts-web@1.1.1/+esm';
-  window.PiperTTS = tts;
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordDuo — учим слова</title>
+    
+    <!-- Иконка в виде эмодзи -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+    
+    <!-- Загрузка Piper TTS -->
+    <script type="module">
+      import * as tts from 'https://cdn.jsdelivr.net/npm/@realtimex/piper-tts-web@1.1.1/+esm';
+      window.PiperTTS = tts;
+    </script>
     <style>
         * {
             margin: 0;
@@ -734,6 +731,7 @@ function speakSystem(text, lang = 'ru-RU') {
 async function speakEnglish(text) {
     if (!text) return;
 
+    // Если Piper не готов — используем системный TTS как запасной вариант
     if (!piperReady || !window.PiperTTS || typeof window.PiperTTS.predict !== 'function') {
         console.warn('Piper не готов, использую системный TTS');
         speakSystem(text, 'en-US');
@@ -741,15 +739,19 @@ async function speakEnglish(text) {
     }
 
     try {
+        // Генерируем аудио нейросетью
         const wav = await window.PiperTTS.predict({
             text: text,
             voiceId: 'en_US-lessac-medium'
         });
+
         const audio = new Audio(URL.createObjectURL(wav));
         audio.play();
+        
+        // Освобождаем память после проигрывания
         audio.onended = () => URL.revokeObjectURL(audio.src);
     } catch (e) {
-        console.warn('Ошибка Piper:', e.message);
+        console.warn('Ошибка Piper, использую системный TTS:', e.message);
         speakSystem(text, 'en-US');
     }
 }
